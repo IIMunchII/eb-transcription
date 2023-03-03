@@ -1,0 +1,74 @@
+version: "3.9"
+
+services:
+
+  minio:
+    image: minio/minio
+    command: server /var/lib/minio --console-address ":9001"
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+      MINIO_ACCESS_KEY: AKIAIOSFODNN7EXAMPLE
+      MINIO_SECRET_KEY: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+    hostname: minio
+    volumes:
+      - minio-data:/var/lib/minio
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "curl",
+          "-f",
+          "http://localhost:9000/minio/health/live"
+        ]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+  createbuckets:
+    image: minio/mc
+    depends_on:
+      - minio
+    entrypoint: >
+      /bin/sh -c " /usr/bin/mc config host add minio http://minio:9000 minioadmin minioadmin ; /usr/bin/mc mb minio/dev; /usr/bin/mc policy set public minio/dev; exit 0;"
+  database:
+    restart: always
+    image: postgres:13
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=django
+      - POSTGRES_PASSWORD=L4rxT*vmoBVsFAtzVVQz
+      - POSTGRES_DB=development
+      - POSTGRES_PORT=5432
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin4
+    restart: always
+    ports:
+      - "5050:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: maintainer.ddsc.io@gmail.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+    depends_on:
+      - database
+
+  redis:
+    image: "redis:alpine"
+    command: redis-server
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/var/lib/redis
+
+volumes:
+  postgres_data:
+  redis-data:
+  minio-data:
+  pgadmin-data:
