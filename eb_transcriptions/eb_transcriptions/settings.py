@@ -74,9 +74,13 @@ WSGI_APPLICATION = 'eb_transcriptions.wsgi.application'
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+    "default": {
+        "ENGINE": "django.db.backends.postgresql_psycopg2",
+        "NAME": "development",
+        "USER": "django",
+        "PASSWORD": "L4rxT*vmoBVsFAtzVVQz",
+        "HOST": "localhost",
+        "PORT": "",
     }
 }
 
@@ -123,3 +127,26 @@ STATIC_URL = '/static/'
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+STATICFILES_LOCATION = "static"
+STATICFILES_STORAGE = "eb_transcriptions.settings.custom_storages.StaticStorage"
+
+PUBLIC_MEDIA_LOCATION = "media/public"
+DEFAULT_FILE_STORAGE = "eb_transcriptions.settings.custom_storages.PublicMediaStorage"
+
+PRIVATE_MEDIA_LOCATION = "media/private"
+PRIVATE_FILE_STORAGE = "eb_transcriptions.settings.custom_storages.PrivateMediaStorage"
+
+DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+
+# local MinIO from docker compose
+AWS_STORAGE_BUCKET_NAME = "dev"
+
+AWS_LOCATION = "dev"
+
+AWS_S3_ENDPOINT_URL = "http://localhost:9000"
+
+STATIC_URL = "{}/{}/".format(AWS_S3_ENDPOINT_URL, AWS_LOCATION)
+
+AWS_ACCESS_KEY_ID = "minioadmin"
+AWS_SECRET_ACCESS_KEY = "minioadmin"
